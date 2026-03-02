@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leonardo Marinho — Data Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Manrope:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#080c10; --bg-2:#0d1117; --surface:#141c26; --border:#1e2d40; --border-2:#243344;
+      --text:#e2e8f0; --text-muted:#7a93b0; --text-dim:#3d5470;
+      --accent:#00d4aa; --accent-dim:#00d4aa22; --accent-glow:#00d4aa44; --accent-2:#0099ff;
+      --font-display:'Syne',sans-serif; --font-body:'Manrope',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+      --r-sm:6px; --r-lg:18px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+    ::selection { background: var(--accent-glow); color: var(--accent); }
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:9999; opacity:0.4;
+    }
+
+    /* NAV */
+    nav { position:fixed; top:0; left:0; right:0; z-index:100; transition:background .3s,border-color .3s; border-bottom:1px solid transparent; }
+    nav.scrolled { background:rgba(8,12,16,.84); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-color:var(--border); }
+    .nav-inner { max-width:1080px; margin:0 auto; padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between; }
+    .nav-logo { font-family:var(--font-mono); font-size:13px; color:var(--accent); letter-spacing:.05em; text-decoration:none; }
+    .nav-right { display:flex; align-items:center; gap:32px; }
+    .nav-links { display:flex; gap:32px; list-style:none; }
+    .nav-links a { font-size:13px; font-weight:500; color:var(--text-muted); text-decoration:none; letter-spacing:.04em; transition:color .2s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; width:0; height:1px; background:var(--accent); transition:width .3s; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+
+    /* LANG TOGGLE */
+    .lang-toggle { display:flex; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:100px; padding:3px; gap:2px; flex-shrink:0; }
+    .lang-btn { font-family:var(--font-mono); font-size:11px; font-weight:500; letter-spacing:.08em; padding:4px 10px; border-radius:100px; border:none; background:transparent; color:var(--text-dim); cursor:pointer; transition:all .2s; }
+    .lang-btn.active { background:var(--accent); color:#080c10; }
+    .lang-btn:not(.active):hover { color:var(--text-muted); }
+
+    /* HERO */
+    #hero { min-height:100vh; display:flex; align-items:center; position:relative; overflow:hidden; padding-top:64px; }
+    #hero::before {
+      content:''; position:absolute; inset:0;
+      background-image:linear-gradient(rgba(0,212,170,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,.04) 1px,transparent 1px);
+      background-size:60px 60px; mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 100%);
+    }
+    #hero::after { content:''; position:absolute; top:20%; left:-10%; width:60%; height:60%; background:radial-gradient(ellipse at center,rgba(0,212,170,.06) 0%,transparent 65%); pointer-events:none; }
+    .hero-inner { position:relative; z-index:1; padding:80px 0 100px; }
+    .hero-tag { display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); background:var(--accent-dim); border:1px solid rgba(0,212,170,.2); padding:6px 14px; border-radius:100px; margin-bottom:28px; }
+    .hero-tag::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); animation:pulse-dot 2s ease infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;box-shadow:0 0 8px var(--accent)} 50%{opacity:.5;box-shadow:0 0 2px var(--accent)} }
+    .hero-name { font-family:var(--font-display); font-size:clamp(48px,8vw,88px); font-weight:800; line-height:1.0; letter-spacing:-.03em; margin-bottom:12px; }
+    .hero-name .accent-line { display:block; background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero-role { font-family:var(--font-mono); font-size:clamp(13px,2vw,16px); color:var(--text-muted); margin-bottom:28px; letter-spacing:.08em; }
+    .hero-role span { color:var(--accent); }
+    .hero-desc { font-size:clamp(15px,2vw,17px); color:var(--text-muted); max-width:520px; line-height:1.75; margin-bottom:44px; }
+    .hero-desc strong { color:var(--text); font-weight:600; }
+    .hero-ctas { display:flex; flex-wrap:wrap; gap:14px; }
+
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:13px 26px; border-radius:var(--r-sm); font-family:var(--font-body); font-size:14px; font-weight:600; text-decoration:none; letter-spacing:.02em; cursor:pointer; border:none; transition:all .2s; }
+    .btn-primary { background:var(--accent); color:#080c10; }
+    .btn-primary:hover { background:#00ffe0; transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,212,170,.3); }
+    .btn-ghost { background:transparent; color:var(--text-muted); border:1px solid var(--border-2); }
+    .btn-ghost:hover { color:var(--text); border-color:var(--text-dim); background:var(--surface); transform:translateY(-1px); }
+
+    /* SECTIONS */
+    section { padding:96px 0; }
+    .section-header { margin-bottom:56px; }
+    .section-eyebrow { font-family:var(--font-mono); font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .section-title { font-family:var(--font-display); font-size:clamp(28px,4vw,42px); font-weight:700; color:var(--text); letter-spacing:-.02em; line-height:1.15; }
+    .section-title .dim { color:var(--text-dim); }
+    .hr-fade { border:none; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
+
+    /* ABOUT */
+    #sobre { background:var(--bg-2); position:relative; }
+    #sobre::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
+    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; }
+    .about-text p { color:var(--text-muted); font-size:16px; line-height:1.8; margin-bottom:18px; }
+    .about-text p strong { color:var(--text); font-weight:600; }
+    .about-text p:last-child { margin-bottom:0; }
+    .skills-wrap { display:flex; flex-direction:column; gap:24px; }
+    .skill-group-label { font-family:var(--font-mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px; }
+    .skill-tags { display:flex; flex-wrap:wrap; gap:7px; }
+    .tag { font-family:var(--font-mono); font-size:11.5px; padding:5px 11px; border-radius:4px; border:1px solid var(--border); color:var(--text-muted); background:var(--surface); transition:all .2s; cursor:default; }
+    .tag:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-dim); }
+    .tag.highlight { border-color:rgba(0,212,170,.3); color:var(--accent); background:rgba(0,212,170,.06); }
+
+    /* PROJECTS */
+    #projetos { background:var(--bg); }
+    .projects-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .project-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:32px; text-decoration:none; color:inherit; display:flex; flex-direction:column; transition:all .25s cubic-bezier(.4,0,.2,1); position:relative; overflow:hidden; }
+    .project-card::before { content:''; position:absolute; inset:0; border-radius:var(--r-lg); opacity:0; transition:opacity .3s; }
+    .project-card.color-teal::before  { background:radial-gradient(ellipse at top left,rgba(0,212,170,.07) 0%,transparent 60%); }
+    .project-card.color-blue::before  { background:radial-gradient(ellipse at top left,rgba(0,153,255,.07) 0%,transparent 60%); }
+    .project-card.color-orange::before{ background:radial-gradient(ellipse at top left,rgba(255,148,40,.07) 0%,transparent 60%); }
+    .project-card.color-purple::before{ background:radial-gradient(ellipse at top left,rgba(150,80,255,.07) 0%,transparent 60%); }
+    .project-card:hover { transform:translateY(-3px); border-color:var(--border-2); box-shadow:0 16px 40px rgba(0,0,0,.4); }
+    .project-card:hover::before { opacity:1; }
+    .project-card.color-teal:hover  { border-color:rgba(0,212,170,.28); }
+    .project-card.color-blue:hover  { border-color:rgba(0,153,255,.28); }
+    .project-card.color-orange:hover{ border-color:rgba(255,148,40,.28); }
+    .project-card.color-purple:hover{ border-color:rgba(150,80,255,.28); }
+    .project-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; }
+    .project-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .project-icon.teal   { background:rgba(0,212,170,.12); border:1px solid rgba(0,212,170,.22); }
+    .project-icon.blue   { background:rgba(0,153,255,.12); border:1px solid rgba(0,153,255,.22); }
+    .project-icon.orange { background:rgba(255,148,40,.12); border:1px solid rgba(255,148,40,.22); }
+    .project-icon.purple { background:rgba(150,80,255,.12); border:1px solid rgba(150,80,255,.22); }
+    .project-link-icon { color:var(--text-dim); transition:color .2s,transform .2s; flex-shrink:0; margin-top:2px; }
+    .project-card:hover .project-link-icon { color:var(--text-muted); transform:translate(2px,-2px); }
+    .project-name { font-family:var(--font-display); font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; letter-spacing:-.01em; line-height:1.2; }
+    .project-desc { font-size:14px; line-height:1.7; color:var(--text-muted); margin-bottom:24px; flex:1; }
+    .project-stack { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; }
+    .stack-tag { font-family:var(--font-mono); font-size:10.5px; padding:3px 9px; border-radius:3px; border:1px solid var(--border); color:var(--text-dim); background:var(--bg); }
+    .project-card.color-teal   .stack-tag.primary { border-color:rgba(0,212,170,.3);  color:#00d4aa; background:rgba(0,212,170,.06); }
+    .project-card.color-blue   .stack-tag.primary { border-color:rgba(0,153,255,.3);  color:#0099ff; background:rgba(0,153,255,.06); }
+    .project-card.color-orange .stack-tag.primary { border-color:rgba(255,148,40,.3); color:#ff9428; background:rgba(255,148,40,.06); }
+    .project-card.color-purple .stack-tag.primary { border-color:rgba(150,80,255,.3); color:#9650ff; background:rgba(150,80,255,.06); }
+
+    /* EXPERIENCE */
+    #experiencia { background:var(--bg-2); position:relative; }
+    #experiencia::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
+    .exp-grid { display:grid; grid-template-columns:260px 1fr; gap:0; }
+    .timeline-col { position:relative; padding-right:48px; }
+    .timeline-col::after { content:''; position:absolute; top:0; right:0; bottom:0; width:1px; background:linear-gradient(to bottom,transparent,var(--border),var(--border),transparent); }
+    .timeline-btn { background:none; border:none; cursor:pointer; text-align:left; padding:20px 0; border-bottom:1px solid var(--border); color:var(--text-muted); transition:color .2s; width:100%; }
+    .timeline-btn:first-child { padding-top:0; }
+    .timeline-btn:last-child { border-bottom:none; }
+    .timeline-btn:hover { color:var(--text); }
+    .timeline-btn.active { color:var(--accent); }
+    .tl-period { font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; margin-bottom:5px; opacity:.7; }
+    .tl-role { font-size:14px; font-weight:600; margin-bottom:3px; line-height:1.3; }
+    .tl-company { font-size:12px; opacity:.7; }
+    .exp-detail-col { padding-left:48px; }
+    .exp-panel { display:none; animation:fadeSlide .35s ease forwards; }
+    .exp-panel.active { display:block; }
+    @keyframes fadeSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .exp-role-title { font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--text); margin-bottom:4px; letter-spacing:-.01em; }
+    .exp-company { font-size:14px; color:var(--accent); margin-bottom:4px; font-weight:500; }
+    .exp-period-loc { font-family:var(--font-mono); font-size:11px; color:var(--text-dim); letter-spacing:.06em; margin-bottom:24px; }
+    .exp-bullets { list-style:none; display:flex; flex-direction:column; gap:12px; }
+    .exp-bullets li { font-size:14.5px; color:var(--text-muted); line-height:1.65; padding-left:20px; position:relative; }
+    .exp-bullets li::before { content:'→'; position:absolute; left:0; color:var(--accent); font-size:12px; top:2px; }
+    .exp-bullets li strong { color:var(--text); font-weight:600; }
+    .exp-tech-row { display:flex; flex-wrap:wrap; gap:7px; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
+    .exp-tech-tag { font-family:var(--font-mono); font-size:10.5px; padding:3px 9px; border-radius:3px; border:1px solid var(--border); color:var(--text-dim); background:var(--bg); }
+
+    /* CONTACT */
+    #contato { background:var(--bg); padding:80px 0 0; }
+    .contact-inner { text-align:center; padding-bottom:96px; position:relative; }
+    .contact-glow { position:absolute; bottom:60px; left:50%; transform:translateX(-50%); width:500px; height:200px; background:radial-gradient(ellipse,rgba(0,212,170,.06) 0%,transparent 65%); pointer-events:none; }
+    .contact-eyebrow { font-family:var(--font-mono); font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:16px; }
+    .contact-title { font-family:var(--font-display); font-size:clamp(32px,5vw,54px); font-weight:800; color:var(--text); letter-spacing:-.03em; line-height:1.1; margin-bottom:18px; }
+    .contact-desc { font-size:16px; color:var(--text-muted); max-width:460px; margin:0 auto 40px; line-height:1.7; }
+    .contact-links { display:flex; justify-content:center; gap:14px; flex-wrap:wrap; }
+
+    /* FOOTER */
+    footer { border-top:1px solid var(--border); padding:28px 0; background:var(--bg); }
+    .footer-inner { display:flex; align-items:center; justify-content:space-between; }
+    .footer-brand { font-family:var(--font-mono); font-size:12px; color:var(--text-dim); }
+    .footer-brand span { color:var(--accent); }
+    .footer-social { display:flex; gap:20px; }
+    .footer-social a { color:var(--text-dim); text-decoration:none; font-size:12px; font-family:var(--font-mono); letter-spacing:.05em; transition:color .2s; }
+    .footer-social a:hover { color:var(--accent); }
+
+    /* ANIMATIONS */
+    .fade-in { opacity:0; transform:translateY(24px); transition:opacity .65s ease,transform .65s ease; }
+    .fade-in.visible { opacity:1; transform:translateY(0); }
+    .fade-in-delay-1 { transition-delay:.1s; }
+    .fade-in-delay-2 { transition-delay:.2s; }
+
+    /* LANG TRANSITION */
+    body.lang-switching [data-i18n] { opacity:0; transition:opacity .15s ease; }
+    [data-i18n] { transition:opacity .15s ease; }
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .container{padding:0 20px;}
+      .about-grid,.projects-grid{grid-template-columns:1fr;gap:40px;}
+      .exp-grid{grid-template-columns:1fr;gap:32px;}
+      .timeline-col{padding-right:0;}
+      .timeline-col::after{display:none;}
+      .exp-detail-col{padding-left:0;padding-top:8px;border-top:1px solid var(--border);}
+      .nav-links{display:none;}
+      .footer-inner{flex-direction:column;gap:12px;text-align:center;}
+    }
+    @media(max-width:600px){
+      section{padding:64px 0;}
+      .hero-inner{padding:60px 0 80px;}
+      .hero-ctas{flex-direction:column;}
+      .btn{width:100%;justify-content:center;}
+    }
+    .icon{display:inline-block;vertical-align:middle;flex-shrink:0;}
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a class="nav-logo" href="#hero">lm.dev</a>
+      <div class="nav-right">
+        <ul class="nav-links">
+          <li><a href="#sobre"       data-i18n="nav.about"></a></li>
+          <li><a href="#projetos"    data-i18n="nav.projects"></a></li>
+          <li><a href="#experiencia" data-i18n="nav.experience"></a></li>
+          <li><a href="#contato"     data-i18n="nav.contact"></a></li>
+        </ul>
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button class="lang-btn active" id="btnPT" onclick="setLang('pt')">PT</button>
+          <button class="lang-btn"        id="btnEN" onclick="setLang('en')">EN</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="container hero-inner">
+      <div class="hero-tag" data-i18n="hero.badge"></div>
+      <h1 class="hero-name">Leonardo<span class="accent-line">Marinho.</span></h1>
+      <p class="hero-role"><span>// </span><span data-i18n="hero.role"></span></p>
+      <p class="hero-desc" data-i18n="hero.desc"></p>
+      <div class="hero-ctas">
+        <a href="#projetos" class="btn btn-primary">
+          <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M3 14h7v7H3z"/><path d="M14 14h7v7h-7z"/></svg>
+          <span data-i18n="hero.cta.projects"></span>
+        </a>
+        <a href="https://www.linkedin.com/in/devleomarinho/" target="_blank" rel="noopener" class="btn btn-ghost">
+          <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          LinkedIn
+        </a>
+        <a href="https://github.com/devleomarinho" target="_blank" rel="noopener" class="btn btn-ghost">
+          <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.74-1.33-1.74-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr-fade" />
+
+  <!-- SOBRE -->
+  <section id="sobre">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-eyebrow">01 — About</p>
+        <h2 class="section-title"><span data-i18n="about.title"></span> <span class="dim" data-i18n="about.title.dim"></span></h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-text fade-in fade-in-delay-1">
+          <p data-i18n="about.p1"></p>
+          <p data-i18n="about.p2"></p>
+          <p data-i18n="about.p3"></p>
+        </div>
+        <div class="skills-wrap fade-in fade-in-delay-2">
+          <div class="skill-group">
+            <p class="skill-group-label" data-i18n="skills.programming"></p>
+            <div class="skill-tags"><span class="tag highlight">Python</span><span class="tag highlight">SQL</span><span class="tag">Java</span></div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label" data-i18n="skills.cloud"></p>
+            <div class="skill-tags"><span class="tag highlight">GCP</span><span class="tag highlight">Azure</span><span class="tag">AWS</span></div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label" data-i18n="skills.processing"></p>
+            <div class="skill-tags"><span class="tag highlight">Snowflake</span><span class="tag highlight">dbt</span><span class="tag">Airflow</span><span class="tag">Databricks</span><span class="tag">Azure Data Factory</span></div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label" data-i18n="skills.bi"></p>
+            <div class="skill-tags"><span class="tag highlight">Power BI</span><span class="tag">Tableau</span><span class="tag">Looker Studio</span></div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label" data-i18n="skills.devops"></p>
+            <div class="skill-tags"><span class="tag highlight">Docker</span><span class="tag">Git / GitHub</span><span class="tag">GitHub Actions</span></div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label" data-i18n="skills.databases"></p>
+            <div class="skill-tags"><span class="tag highlight">PostgreSQL</span><span class="tag highlight">MySQL</span><span class="tag">SQLite</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr-fade" />
+
+  <!-- PROJETOS -->
+  <section id="projetos">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-eyebrow">02 — Projects</p>
+        <h2 class="section-title"><span data-i18n="projects.title"></span> <span class="dim" data-i18n="projects.title.dim"></span></h2>
+      </div>
+      <div class="projects-grid">
+
+        <a href="https://github.com/devleomarinho/elt_gcp_snowflake" target="_blank" rel="noopener" class="project-card color-teal fade-in fade-in-delay-1">
+          <div class="project-top">
+            <div class="project-icon teal"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div>
+            <svg class="project-link-icon icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17L17 7"/></svg>
+          </div>
+          <h3 class="project-name">ELT Pipeline — GCP &amp; Snowflake</h3>
+          <p class="project-desc" data-i18n="proj1.desc"></p>
+          <div class="project-stack"><span class="stack-tag primary">Snowflake</span><span class="stack-tag primary">GCP</span><span class="stack-tag">SQL</span><span class="stack-tag">Python</span><span class="stack-tag">Star Schema</span><span class="stack-tag">Medallion</span></div>
+        </a>
+
+        <a href="https://github.com/devleomarinho/elt_gestao_b2b" target="_blank" rel="noopener" class="project-card color-blue fade-in fade-in-delay-2">
+          <div class="project-top">
+            <div class="project-icon blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0099ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <svg class="project-link-icon icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17L17 7"/></svg>
+          </div>
+          <h3 class="project-name">ELT Gestão B2B — dbt &amp; BigQuery</h3>
+          <p class="project-desc" data-i18n="proj2.desc"></p>
+          <div class="project-stack"><span class="stack-tag primary">dbt Cloud</span><span class="stack-tag primary">BigQuery</span><span class="stack-tag">GCP</span><span class="stack-tag">Python</span><span class="stack-tag">Artifact Registry</span><span class="stack-tag">Cloud Run</span></div>
+        </a>
+
+        <a href="https://github.com/devleomarinho/pipeline_databricks" target="_blank" rel="noopener" class="project-card color-orange fade-in fade-in-delay-1">
+          <div class="project-top">
+            <div class="project-icon orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff9428" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <svg class="project-link-icon icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17L17 7"/></svg>
+          </div>
+          <h3 class="project-name">Pipeline Databricks + Airflow + Slack</h3>
+          <p class="project-desc" data-i18n="proj3.desc"></p>
+          <div class="project-stack"><span class="stack-tag primary">Azure Databricks</span><span class="stack-tag primary">Apache Airflow</span><span class="stack-tag">Python</span><span class="stack-tag">Slack API</span><span class="stack-tag">Parquet</span></div>
+        </a>
+
+        <a href="https://github.com/devleomarinho/pipeline_databricks_azure" target="_blank" rel="noopener" class="project-card color-purple fade-in fade-in-delay-2">
+          <div class="project-top">
+            <div class="project-icon purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9650ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>
+            <svg class="project-link-icon icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17L17 7"/></svg>
+          </div>
+          <h3 class="project-name">ETL Azure — Databricks &amp; Data Factory</h3>
+          <p class="project-desc" data-i18n="proj4.desc"></p>
+          <div class="project-stack"><span class="stack-tag primary">Azure Databricks</span><span class="stack-tag primary">Data Factory</span><span class="stack-tag">PySpark</span><span class="stack-tag">Delta Lake</span><span class="stack-tag">ADLS Gen2</span></div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr-fade" />
+
+  <!-- EXPERIÊNCIA -->
+  <section id="experiencia">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-eyebrow">03 — Experience</p>
+        <h2 class="section-title"><span data-i18n="exp.title"></span> <span class="dim" data-i18n="exp.title.dim"></span></h2>
+      </div>
+      <div class="exp-grid fade-in">
+        <div class="timeline-col">
+          <div class="timeline-items">
+            <button class="timeline-btn active" data-panel="exp1" onclick="switchExp(this)">
+              <div class="tl-period">08/2025 — <span data-i18n="exp.present"></span></div>
+              <div class="tl-role" data-i18n="exp1.role"></div>
+              <div class="tl-company">Zygon Adtech</div>
+            </button>
+            <button class="timeline-btn" data-panel="exp2" onclick="switchExp(this)">
+              <div class="tl-period">11/2024 — 07/2025</div>
+              <div class="tl-role" data-i18n="exp2.role"></div>
+              <div class="tl-company">Oneway Data</div>
+            </button>
+          </div>
+        </div>
+        <div class="exp-detail-col">
+          <div class="exp-panel active" id="exp1">
+            <div class="exp-role-title" data-i18n="exp1.role"></div>
+            <div class="exp-company">Zygon Adtech</div>
+            <div class="exp-period-loc" data-i18n="exp1.period"></div>
+            <ul class="exp-bullets">
+              <li data-i18n="exp1.b1"></li>
+              <li data-i18n="exp1.b2"></li>
+              <li data-i18n="exp1.b3"></li>
+              <li data-i18n="exp1.b4"></li>
+            </ul>
+            <div class="exp-tech-row">
+              <span class="exp-tech-tag">GCP</span><span class="exp-tech-tag">BigQuery</span><span class="exp-tech-tag">dbt</span><span class="exp-tech-tag">Python</span><span class="exp-tech-tag">SQL</span><span class="exp-tech-tag">Tableau</span><span class="exp-tech-tag">Power BI</span>
+            </div>
+          </div>
+          <div class="exp-panel" id="exp2">
+            <div class="exp-role-title" data-i18n="exp2.role"></div>
+            <div class="exp-company">Oneway Data</div>
+            <div class="exp-period-loc" data-i18n="exp2.period"></div>
+            <ul class="exp-bullets">
+              <li data-i18n="exp2.b1"></li>
+              <li data-i18n="exp2.b2"></li>
+              <li data-i18n="exp2.b3"></li>
+              <li data-i18n="exp2.b4"></li>
+            </ul>
+            <div class="exp-tech-row">
+              <span class="exp-tech-tag">Power BI</span><span class="exp-tech-tag">DAX</span><span class="exp-tech-tag">SQL Server</span><span class="exp-tech-tag">SQL</span><span class="exp-tech-tag">Google Analytics</span><span class="exp-tech-tag">Figma</span><span class="exp-tech-tag">ETL</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr-fade" />
+
+  <!-- CONTATO -->
+  <section id="contato">
+    <div class="container">
+      <div class="contact-inner fade-in">
+        <div class="contact-glow"></div>
+        <p class="contact-eyebrow">04 — Contact</p>
+        <h2 class="contact-title" data-i18n="contact.title"></h2>
+        <p class="contact-desc" data-i18n="contact.desc"></p>
+        <div class="contact-links">
+          <a href="mailto:dev.leomarinho@gmail.com" class="btn btn-primary">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            dev.leomarinho@gmail.com
+          </a>
+          <a href="https://www.linkedin.com/in/devleomarinho/" target="_blank" rel="noopener" class="btn btn-ghost">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://github.com/devleomarinho" target="_blank" rel="noopener" class="btn btn-ghost">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.74-1.33-1.74-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.49 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="container">
+        <div class="footer-inner">
+          <span class="footer-brand"><span>Leonardo Marinho</span> · dev.leomarinho@gmail.com</span>
+          <div class="footer-social">
+            <a href="https://www.linkedin.com/in/devleomarinho/" target="_blank" rel="noopener">linkedin</a>
+            <a href="https://github.com/devleomarinho" target="_blank" rel="noopener">github</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <script>
+    /* ─── TRANSLATIONS ─────────────────────────────────────── */
+    const T = {
+      pt: {
+        'nav.about':'Sobre','nav.projects':'Projetos','nav.experience':'Experiência','nav.contact':'Contato',
+        'hero.badge':'Disponível para novas oportunidades',
+        'hero.role':'Engenheiro de Dados · Analytics Engineer',
+        'hero.desc':'Construo <strong> pipelines de dados escaláveis e soluções de BI em ambientes cloud modernos — GCP, Azure e AWS.</strong> Experiente em <strong>dbt, Snowflake, Databricks e Airflow</strong>, meu objetivo é transformar dados brutos em inteligência estratégica.',
+        'hero.cta.projects':'Ver Projetos',
+        'about.title':'Sobre','about.title.dim':'mim',
+        'about.p1':'Profissional com experiência em projetos de <strong>engenharia de dados e análise de BI</strong>, construindo soluções eficientes e escaláveis em fluxos de <strong>ETL/ELT</strong> e análise de dados, trazendo insights estratégicos e otimização de processos.',
+        'about.p2':'Proficiente em <strong>Python, SQL e Spark</strong> para transformações complexas, com domínio de ferramentas como <strong>dbt, Airflow, Snowflake e Databricks</strong> para orquestração e modelagem de dados em escala. Atuo em plataformas cloud como <strong>GCP, Azure e AWS</strong>.',
+        'about.p3':'Também entrego valor na camada de <strong>visualização e BI</strong> com Power BI e Tableau — do pipeline ao dashboard, com foco em <strong>arquiteturas de baixo custo operacional, governança e alta disponibilidade</strong> dos dados para a tomada de decisão.',
+        'skills.programming':'Programação','skills.cloud':'Clouds','skills.processing':'Processamento & Orquestração','skills.bi':'BI & Visualização','skills.devops':'Conteinerização, Versionamento & CI/CD', 'skills.databases':'Bancos de Dados',
+        'projects.title':'Projetos','projects.title.dim':'selecionados',
+        'proj1.desc':'Pipeline end-to-end de inteligência comercial B2B com dados de ERP (CSV) e CRM (JSON), integrando serviços da GCP com Snowflake como DataLake. Carga incremental via Hash Diff (MD5 + MERGE), flatten de JSONs semi-estruturados com <code>LATERAL FLATTEN</code> e transformações dos dados via SQL. Arquitetura Medalhão com camadas Bronze → Silver → Gold.',
+        'proj2.desc':'Data Stack moderno serverless de baixo custo operacional, utilizando serviços da GCP com dbt Cloud para inteligência comercial B2B. Ingesta CRM e planilhas via Cloud Run + Artifact Registry, transforma os dados com dbt (Bronze→Gold), rastreia histórico com SCD Type 2 e entrega camada analítica confiável para tomadas de decisões de negócio assertivas automaticamente.',
+        'proj3.desc':'Pipeline automatizado de cotações de moedas estrangeiras via Exchange Rates API. Orquestrado pelo Apache Airflow com execução em Azure Databricks — notebooks de extração, transformação e visualização em arquitetura Medallion. Relatórios enviados automaticamente via bot no Slack.',
+        'proj4.desc':'Solução ETL completa com Azure Databricks (PySpark) para dados imobiliários, Azure Data Factory para orquestração e Azure Data Lake Storage Gen2 em arquitetura Medallion (Landing → Bronze → Silver). Integração contínua via GitHub com gatilhos por evento e agendados.',
+        'exp.title':'Experiência','exp.title.dim':'profissional','exp.present':'Presente',
+        'exp1.role':'Engenheiro de Dados','exp1.period':'Agosto 2025 — Presente · Remoto',
+        'exp1.b1':'Arquitetou e desenvolveu um <strong>pipeline ELT de ponta a ponta</strong>, provisionando infraestrutura no Google BigQuery e criando scripts de ingestão em Python. Modelagem e transformação com <strong>dbt</strong>, garantindo versionamento, governança, testes automatizados e documentação — entregando dashboards padronizados e replicáveis.',
+        'exp1.b2':'Automatizou processos de ingestão previamente manuais, otimizando pipelines de ETL e resultando em uma <strong>redução de mais de 60%</strong> no tempo operacional, aumentando a disponibilidade das informações para os clientes.',
+        'exp1.b3':'Auxiliou a migração das ferramentas de orquestração, reestruturando a arquitetura para opções mais eficientes — gerando uma <strong>redução de ~85% nos custos mensais de infraestrutura</strong> em nuvem sem comprometer performance e resiliência.',
+        'exp1.b4':'Atuou na sustentação, monitoramento e expansão de pipelines integrados ao ecossistema <strong>Tableau</strong>, assegurando entrega contínua de relatórios analíticos para suporte à tomada de decisão estratégica.',
+        'exp2.role':'Analista de BI','exp2.period':'Novembro 2024 — Julho 2025 · Remoto',
+        'exp2.b1':'Desenvolveu solução analítica para o <strong>setor educacional</strong> — da ingestão de múltiplas fontes até a modelagem dimensional e entrega de dashboards no Power BI para as áreas Financeira, Comercial e Pedagógica, mapeando KPIs estratégicos de negócio.',
+        'exp2.b2':'Otimizou a performance de relatórios no <strong>Power BI</strong> via refatoração e criação de medidas DAX, resultando em <strong>redução de 30% no tempo de carregamento</strong> dos dashboards para os usuários finais.',
+        'exp2.b3':'Liderou modelagem e transformação de dados brutos, reestruturando bases lógicas para geração de insights acionáveis — com <strong>redução de 60% no tempo de execução</strong> de consultas SQL.',
+        'exp2.b4':'Automatizou workflows de dados integrando bases do <strong>SQL Server</strong> com métricas do Google Analytics. Projetou layouts customizados no <strong>Figma</strong> para dashboards com alta taxa de adoção pelas áreas de negócio.',
+        'contact.title':'Vamos construir<br>algo juntos?',
+        'contact.desc':'Aberto a projetos de engenharia de dados, posições CLT/PJ e colaborações em stack cloud moderna. Entre em contato.',
+      },
+      en: {
+        'nav.about':'About','nav.projects':'Projects','nav.experience':'Experience','nav.contact':'Contact',
+        'hero.badge':'Open to new opportunities',
+        'hero.role':'Data Engineer · Analytics Engineer',
+        'hero.desc':'I build <strong>scalable ELT pipelines and BI solutions</strong> in modern cloud environments — GCP, Azure and AWS. Specialized in <strong>dbt, Databricks, Airflow and Snowflake</strong>, focused on turning raw data into strategic intelligence.',
+        'hero.cta.projects':'View Projects',
+        'about.title':'About','about.title.dim':'me',
+        'about.p1':'Professional with experience in <strong>data engineering and BI analytics</strong> projects, building efficient and scalable solutions in <strong>ETL/ELT</strong> pipelines and data analysis, delivering strategic insights and process optimization.',
+        'about.p2':'Proficient in <strong>Python, SQL and Spark</strong> for complex transformations, with expertise in tools like <strong>dbt, Airflow and Databricks</strong> for data orchestration and modeling at scale. I work across <strong>GCP, Azure and AWS</strong>, with Snowflake and BigQuery as central Data Warehouses.',
+        'about.p3':'I also deliver value in the <strong>BI and visualization</strong> layer with Power BI and Tableau — from pipeline to dashboard, focused on <strong>low-cost architectures, governance and high data availability</strong> to support decision-making.',
+        'skills.programming':'Programming','skills.cloud':'Cloud Providers ','skills.processing':'Processing & Orchestration','skills.bi':'BI & Visualization','skills.devops':'Conteinerization, Versioning & CI/CD', 'skills.databases':'Databases',
+        'projects.title':'Selected','projects.title.dim':'projects',
+        'proj1.desc':'End-to-end B2B commercial intelligence pipeline integrating ERP (CSV) and CRM (JSON) with Snowflake as the central DataLake. Incremental ingestion via Hash Diff (MD5 + MERGE), semi-structured JSON flattening with <code>LATERAL FLATTEN</code>, and native deduplication. Star Schema with Bronze → Silver → Gold layers.',
+        'proj2.desc':'Serverless Modern Data Stack on GCP Free Tier for B2B commercial intelligence. Ingests CRM, goals and marketing via Cloud Run + Docker, transforms with dbt (Bronze→Gold), tracks history with SCD Type 2, and automatically delivers ROI, CAC and funnel performance KPIs.',
+        'proj3.desc':'Automated pipeline for foreign currency exchange rates via the Exchange Rates API. Orchestrated by Apache Airflow on Azure Databricks — extraction, transformation and visualization notebooks in Medallion architecture. Reports automatically dispatched via a Slack bot.',
+        'proj4.desc':'Complete ETL solution with Azure Databricks (PySpark) for real estate data, Azure Data Factory for orchestration and Azure Data Lake Storage Gen2 in Medallion architecture (Landing → Bronze → Silver). Continuous integration via GitHub with event-driven and scheduled triggers.',
+        'exp.title':'Professional','exp.title.dim':'experience','exp.present':'Present',
+        'exp1.role':'Data Engineer','exp1.period':'August 2025 — Present · Remote',
+        'exp1.b1':'Architected and developed an <strong>end-to-end ELT pipeline</strong>, provisioning infrastructure on Google BigQuery and building Python ingestion scripts. Led data modeling and transformation with <strong>dbt</strong>, ensuring versioning, governance, automated testing and documentation — delivering standardized, replicable dashboards.',
+        'exp1.b2':'Automated previously manual ingestion processes, optimizing ETL pipelines and achieving a <strong>reduction of over 60%</strong> in operational time, significantly increasing information availability for clients.',
+        'exp1.b3':'Assisted the migration of orchestration tools, restructuring the architecture toward more efficient alternatives — generating a <strong>~85% reduction in monthly cloud infrastructure costs</strong> while maintaining high performance and resilience.',
+        'exp1.b4':'Maintained, monitored and expanded data pipelines integrated with the <strong>Tableau</strong> ecosystem, ensuring continuous delivery of high-quality analytical reports to support strategic decision-making across the organization.',
+        'exp2.role':'BI Analyst','exp2.period':'November 2024 — July 2025 · Remote',
+        'exp2.b1':'Developed an analytical solution for the <strong>education sector</strong> — from multi-source ingestion to dimensional modeling and Power BI dashboard delivery for Finance, Commercial and Academic teams, mapping strategic business KPIs.',
+        'exp2.b2':'Optimized <strong>Power BI</strong> report performance through advanced DAX refactoring, resulting in a <strong>30% reduction in dashboard load time</strong> for end users.',
+        'exp2.b3':'Led raw data modeling and transformation, redesigning logical structures to generate actionable insights — achieving a <strong>60% reduction in SQL query execution time</strong>.',
+        'exp2.b4':'Automated data workflows integrating <strong>SQL Server</strong> databases with Google Analytics metrics. Designed custom layouts in <strong>Figma</strong> for dashboards with high adoption rates across business teams.',
+        'contact.title':"Let's build<br>something together?",
+        'contact.desc':'Open to data engineering projects, full-time or contract positions, and collaborations in modern cloud stacks. Get in touch.',
+      }
+    };
+
+    /* ─── LANGUAGE ENGINE ──────────────────────────────────── */
+    let currentLang = 'pt';
+
+    function applyTranslations(lang) {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const v = T[lang][el.getAttribute('data-i18n')];
+        if (v !== undefined) el.innerHTML = v;
+      });
+      document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    }
+
+    function setLang(lang) {
+      if (lang === currentLang) return;
+      currentLang = lang;
+      document.getElementById('btnPT').classList.toggle('active', lang === 'pt');
+      document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+      document.body.classList.add('lang-switching');
+      setTimeout(() => {
+        applyTranslations(lang);
+        document.body.classList.remove('lang-switching');
+      }, 150);
+    }
+
+    applyTranslations('pt'); // initial render
+
+    /* ─── NAVBAR ───────────────────────────────────────────── */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', scrollY > 24);
+    }, { passive: true });
+
+    /* ─── FADE-IN ──────────────────────────────────────────── */
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+    document.querySelectorAll('#hero .fade-in').forEach(el => el.classList.add('visible'));
+
+    /* ─── EXP TABS ─────────────────────────────────────────── */
+    function switchExp(btn) {
+      document.querySelectorAll('.timeline-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.exp-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.panel)?.classList.add('active');
+    }
+
+    /* ─── SMOOTH SCROLL ────────────────────────────────────── */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) window.scrollTo({ top: t.getBoundingClientRect().top + scrollY - 72, behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>
